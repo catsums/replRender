@@ -6,7 +6,6 @@ declare global{
 }
 
 import fs from 'fs';
-import path from 'path';
 
 export const DefaultOnNullText = function(oldVal = '', key = '', currInp : PlainObject = {}, currKey = '', str = '', inp : PlainObject = {}){
 	return oldVal;
@@ -17,12 +16,26 @@ export const DefaultHandleVars = function(token:string, key:string, initResult: 
 
 export const DefaultRegExp = /{{(.+?)}}|\(\((.+?)\)\)|<var var="(.+?)"\/>/g
 
-export function createEngine({
-	regex = DefaultRegExp,
-	nullHandler = DefaultOnNullText,
-	variableHandler = DefaultHandleVars,
-	encoding = 'utf8'
-}){
+let DefaultOpts = {
+	regex: DefaultRegExp,
+	nullHandler: DefaultOnNullText,
+	variableHandler: DefaultHandleVars,
+	encoding: 'utf8',
+};
+
+export function createEngine(opts : { 
+	regex? : RegExp, 
+	nullHandler?, 
+	variableHandler?, 
+	encoding? : string
+} = DefaultOpts){
+	let { 
+		regex = DefaultRegExp, 
+		nullHandler = DefaultOnNullText, 
+		variableHandler = DefaultHandleVars, 
+		encoding = 'utf8',
+	} = opts;
+
 	let engine = (filePath, opts, callback) => { // define the template engine
 		fs.promises.readFile(filePath).then((content) => {
 			if(!Buffer.isEncoding(encoding)){
@@ -42,21 +55,37 @@ export function createEngine({
 	return engine;
 }
 
-export function render(input : string, data : PlainObject, {
-	regex = DefaultRegExp,
-	nullHandler = DefaultOnNullText,
-	variableHandler = DefaultHandleVars,
-}){
+
+export function render(input : string, data : PlainObject, opts : { 
+	regex? : RegExp, 
+	nullHandler?, 
+	variableHandler?,
+} = DefaultOpts){
+	let { 
+		regex = DefaultRegExp, 
+		nullHandler = DefaultOnNullText, 
+		variableHandler = DefaultHandleVars,
+	} = opts;
+
 	let renderedStr = renderText(input, data, regex, nullHandler, variableHandler);
 	return renderedStr;
 }
-export async function renderFile(filePath : string, data : PlainObject, {
-	regex = DefaultRegExp,
-	nullHandler = DefaultOnNullText,
-	variableHandler = DefaultHandleVars,
-	encoding = 'utf8',
-}, callback = (c) => {}){
-	fs.promises.readFile(filePath).then((content) => {
+export async function renderFile(filePath : string, data : PlainObject, opts : { 
+	regex? : RegExp, 
+	nullHandler?, 
+	variableHandler?, 
+	encoding? : string
+} = DefaultOpts, 
+	callback = (err, c) => (err ? err : c)
+){
+	let { 
+		regex = DefaultRegExp, 
+		nullHandler = DefaultOnNullText, 
+		variableHandler = DefaultHandleVars, 
+		encoding = 'utf8',
+	} = opts;
+
+	return fs.promises.readFile(filePath).then((content) => {
 		if(!Buffer.isEncoding(encoding)){
 			encoding = 'utf8';
 		}
@@ -64,10 +93,10 @@ export async function renderFile(filePath : string, data : PlainObject, {
 		let str = content.toString(encoding as BufferEncoding);
 		let rend = renderText(str, data, regex, nullHandler, variableHandler);
 		
-		callback(rend);
-		return rend;
+		return callback(null, rend);
 	}).catch((err)=>{
-		if (err) return callback(err);
+		if(err) 
+		throw callback(err, null);
 	})
 }
 

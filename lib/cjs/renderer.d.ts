@@ -6,20 +6,20 @@ declare global {
 export declare const DefaultOnNullText: (oldVal?: string, key?: string, currInp?: PlainObject, currKey?: string, str?: string, inp?: PlainObject) => string;
 export declare const DefaultHandleVars: (token: string, key: string, initResult: string) => string;
 export declare const DefaultRegExp: RegExp;
-export declare function createEngine({ regex, nullHandler, variableHandler, encoding }: {
+export declare function createEngine(opts?: {
     regex?: RegExp;
-    nullHandler?: (oldVal?: string, key?: string, currInp?: PlainObject<any>, currKey?: string, str?: string, inp?: PlainObject<any>) => string;
-    variableHandler?: (token: string, key: string, initResult: string) => string;
+    nullHandler?: any;
+    variableHandler?: any;
     encoding?: string;
 }): (filePath: any, opts: any, callback: any) => void;
-export declare function render(input: string, data: PlainObject, { regex, nullHandler, variableHandler, }: {
+export declare function render(input: string, data: PlainObject, opts?: {
     regex?: RegExp;
-    nullHandler?: (oldVal?: string, key?: string, currInp?: PlainObject<any>, currKey?: string, str?: string, inp?: PlainObject<any>) => string;
-    variableHandler?: (token: string, key: string, initResult: string) => string;
+    nullHandler?: any;
+    variableHandler?: any;
 }): string;
-export declare function renderFile(filePath: string, data: PlainObject, { regex, nullHandler, variableHandler, encoding, }: {
+export declare function renderFile(filePath: string, data: PlainObject, opts?: {
     regex?: RegExp;
-    nullHandler?: (oldVal?: string, key?: string, currInp?: PlainObject<any>, currKey?: string, str?: string, inp?: PlainObject<any>) => string;
-    variableHandler?: (token: string, key: string, initResult: string) => string;
+    nullHandler?: any;
+    variableHandler?: any;
     encoding?: string;
-}, callback?: (c: any) => void): Promise<void>;
+}, callback?: (err: any, c: any) => any): Promise<any>;

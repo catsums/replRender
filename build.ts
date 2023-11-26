@@ -1,8 +1,6 @@
 import * as esbuild from 'esbuild';
 import { umdWrapper } from "esbuild-plugin-umd-wrapper";
-import {
-	Generator
-} from 'npm-dts';
+// import { Generator } from 'npm-dts';
 import util from 'util';
 import child_process from 'child_process';
 import fs from 'fs';
@@ -10,13 +8,11 @@ import path from 'path';
 
 const exec = util.promisify(child_process.exec);
 
-let entry = ['./src/*.ts'];
-let outDir = './lib'
 
-new Generator({
-	entry: 'src/index.ts',
-	output: 'lib/index.d.ts',
-}).generate();
+// new Generator({
+// 	entry: 'src/index.ts',
+// 	output: 'lib/index.d.ts',
+// }).generate();
 
 const Settings = {
 	watch: false,
@@ -32,11 +28,16 @@ process.argv.forEach(function (val) {
 	}
 });
 
+let entry = ['./src/*.ts'];
+let outDir = './lib';
+
+const GlobalName = "ReplRender";
+
 let _default = {
 	entryPoints: entry,
 	bundle: false,
 	platform: 'neutral',
-	globalName: 'ReplRender',
+	globalName: GlobalName,
 	plugins: [],
 	minify: false,
 	keepNames: true,
@@ -56,10 +57,17 @@ let data = [
 		format: 'esm',
 	},
 	{
-		_id: `browser`,
-		outdir: `${outDir}/browser`,
-		platform: "browser",
-		format: 'iife',
+		_id: `umd`,
+		outdir: `${outDir}/umd`,
+		platform: "node",
+		// format: 'iife',
+		format: "umd", // or "cjs"
+		bundle: true,
+		plugins: [
+			umdWrapper({
+				libraryName: GlobalName,
+			})
+		],
 	},
 ];
 
@@ -72,7 +80,6 @@ async function Build(){
 			await fs.promises.rm(path.join(`${outDir}`, file), {recursive: true, force: true});
 		}
 	}
-
 
 	let cmd = `tsc --outDir ${outDir}${Settings.watch ? ' --watch':''}`;
 	await exec(cmd);
